@@ -111,21 +111,15 @@ func UpdateUser(c *gin.Context) {
 		"msg": msg,
 	})
 }
-func (d *Detail) Get() (detail Detail, err error) {
-	detail = Detail{}
-	err = DB.QueryRow("SELECT * from ticket_detail WHERE event_num = ?", detail.EventNum).Scan(
-		&detail.EventNum, &detail.Title, &detail.Performer, &detail.Price, &detail.TimeAt, &detail.BookFrom, &detail.EventNum, &detail.LimitSeat)
-	return
-}
 
 //獲得詳細表演資訊
 func GetOneDetail(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
-	d := User{
-		Id: id,
+	d := Detail{
+		EventNum: id,
 	}
-	rs, _ := d.Get()
+	rs, _ := d.GetOne()
 	c.JSON(http.StatusOK, gin.H{
 		"result": rs,
 	})
@@ -161,4 +155,11 @@ func (u *User) Update() int64 {
 		log.Fatal(err)
 	}
 	return rows
+}
+
+func (d *Detail) GetOne() (detail Detail, err error) {
+	detail = Detail{}
+	err = DB.QueryRow("SELECT * from ticket_detail WHERE event_num = ?", d.EventNum).Scan(
+		&detail.EventNum, &detail.Title, &detail.Performer, &detail.Price, &detail.TimeAt, &detail.BookFrom, &detail.EventNum, &detail.LimitSeat)
+	return
 }
