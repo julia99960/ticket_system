@@ -14,7 +14,7 @@ import (
 var DB *sql.DB
 
 type User struct {
-	Id       int    `json:"id" form:"id"`
+	ID       int    `json:"id" form:"id"`
 	IdNumber string `json:"id_number" form:"id_number"`
 	Mail     string `json:"mail" form:"mail"`
 	Name     string `json:"name" form:"name"`
@@ -33,6 +33,15 @@ type Detail struct {
 	LimitSeat string `json:"limit_seat" form:"limit_seat"`
 }
 
+type Ticket struct {
+	ID       int    `json:"id" form:"id"`
+	EventNum int    `json:"event_num" form:"event_num"`
+	UserID   int    `json:"user" form:"user"`
+	BookAt   string `json:"book_at" from:"book_at"`
+	PayAt    string `json:"pay_at" form:"pay_at"`
+	Status   string `json:"status" form:"status"`
+}
+
 func init() {
 	var err error
 	DB, err = sql.Open("mysql", "root:demoroot@tcp(127.0.0.1:3306)/ticket?charset=utf8mb4")
@@ -49,12 +58,18 @@ func main() {
 	defer DB.Close()
 
 	router := gin.Default()
+
+	//訂票者資訊
 	router.GET("/user/:id", GetOne)
 	router.POST("user", AddOne)
 	router.PATCH("user/:id", UpdateUser)
 
+	//表演詳細資料
 	router.GET("/detail/:id", GetOneDetail)
 	router.POST("/detail", AddOneDetail)
+
+	//已訂門票資訊
+	router.GET("/ticket/:id", GetTicket)
 	router.Run(":8000")
 }
 
@@ -63,7 +78,7 @@ func GetOne(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
 	u := User{
-		Id: id,
+		ID: id,
 	}
 	rs, _ := u.GetRow()
 	c.JSON(http.StatusOK, gin.H{
@@ -99,11 +114,11 @@ func UpdateUser(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
 	u := User{
-		Id: id,
+		ID: id,
 	}
 	status := c.Request.FormValue("status")
 	user := User{
-		Id:     u.Id,
+		ID:     u.ID,
 		Status: status,
 	}
 	row := user.Update()
@@ -154,9 +169,21 @@ func AddOneDetail(c *gin.Context) {
 
 }
 
+func GetTicket(c *gin.Context) {
+	userids := c.Param("id")
+	userid, _ := strconv.Atoi(userids)
+	u := Ticket{
+		UserID: userid,
+	}
+	rs, _ := u.GetRow()
+	c.JSON(http.StatusOK, gin.H{
+		"result": rs,
+	})
+}
+
 func (u *User) GetRow() (user User, err error) {
 	user = User{}
-	err = DB.QueryRow("SELECT id_number, mail, name, birthday, status FROM user WHERE id=?", u.Id).Scan(
+	err = DB.QueryRow("SELECT id_number, mail, name, birthday, status FROM user WHERE id=?", u.ID).Scan(
 		&user.IdNumber, &user.Mail, &user.Name, &user.Birth, &user.Status)
 	return
 }
@@ -175,7 +202,7 @@ func (u *User) Create() int64 {
 }
 
 func (u *User) Update() int64 {
-	rs, err := DB.Exec("update user set status = ? where id = ?;", u.Status, u.Id)
+	rs, err := DB.Exec("update user set status = ? where id = ?;", u.Status, u.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -205,4 +232,11 @@ func (d *Detail) Create() int64 {
 		log.Fatal(err)
 	}
 	return id
+}
+
+func (t *Ticket) GetRow() (ticket Ticket, err error) {
+	ticket = Ticket{}
+	err = DB.QueryRow("select event_num, book_at, pay_at, status from ticket where userid = ?", t.UserID).Scan(
+		&ticket.EventNum, &ticket.BookAt, &ticket.PayAt, &ticket.Status)
+	return
 }
