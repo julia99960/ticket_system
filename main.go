@@ -54,6 +54,7 @@ func main() {
 	router.PATCH("user/:id", UpdateUser)
 
 	router.GET("/detail/:id", GetOneDetail)
+	router.POST("/detail", AddOneDetail)
 	router.Run(":8000")
 }
 
@@ -112,7 +113,7 @@ func UpdateUser(c *gin.Context) {
 	})
 }
 
-//獲得詳細表演資訊
+//獲得詳細表演場次資訊
 func GetOneDetail(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
@@ -123,6 +124,34 @@ func GetOneDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"result": rs,
 	})
+}
+
+//新增一筆表演場次
+func AddOneDetail(c *gin.Context) {
+	title := c.Request.FormValue("title")
+	performer := c.Request.FormValue("performer")
+	ticket_price := c.Request.FormValue("ticket_price")
+	time_at := c.Request.FormValue("time_at")
+	book_from := c.Request.FormValue("book_from")
+	endbook_at := c.Request.FormValue("endbook_at")
+	limit_seat := c.Request.FormValue("limit_seat")
+
+	d := Detail{
+		Title:     title,
+		Performer: performer,
+		Price:     ticket_price,
+		TimeAt:    time_at,
+		BookFrom:  book_from,
+		EndbookAt: endbook_at,
+		LimitSeat: limit_seat,
+	}
+
+	id := d.Create()
+	msg := fmt.Sprintf("insert successful %d", id)
+	c.JSON(http.StatusOK, gin.H{
+		"msg": msg,
+	})
+
 }
 
 func (u *User) GetRow() (user User, err error) {
@@ -162,4 +191,18 @@ func (d *Detail) GetOne() (detail Detail, err error) {
 	err = DB.QueryRow("SELECT * from ticket_detail WHERE event_num = ?", d.EventNum).Scan(
 		&detail.EventNum, &detail.Title, &detail.Performer, &detail.Price, &detail.TimeAt, &detail.BookFrom, &detail.EventNum, &detail.LimitSeat)
 	return
+}
+
+func (d *Detail) Create() int64 {
+	rs, err := DB.Exec("INSERT INTO ticket_detail (title, performer, ticket_price, time_at, book_from, endbook_at , limit_seat) VALUES (?, ?, ?, ?, ?, ?, ?);",
+		&d.Title, &d.Performer, &d.Price, &d.TimeAt, &d.BookFrom, &d.EndbookAt, &d.LimitSeat)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	id, err := rs.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return id
 }
