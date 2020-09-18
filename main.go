@@ -251,10 +251,9 @@ func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 		ticket := Ticket{}
 		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.Status)
 		if err != nil {
-			if err != nil {
-				log.Fatal(err)
-			}
 			tickets = append(tickets, ticket)
+		} else {
+			log.Fatal(err)
 		}
 	}
 	rows.Close()
