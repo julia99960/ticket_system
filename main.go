@@ -38,12 +38,12 @@ type Detail struct {
 
 // Ticket 下單紀錄
 type Ticket struct {
-	ID       int    `json:"id" form:"id"`
-	EventNum int    `json:"event_num" form:"event_num"`
-	UserID   int    `json:"userid" form:"userid"`
-	BookAt   string `json:"book_at" from:"book_at"`
-	PayAt    string `json:"pay_at" form:"pay_at"`
-	Status   string `json:"status" form:"status"`
+	ID       int            `json:"id" form:"id"`
+	EventNum int            `json:"event_num" form:"event_num"`
+	UserID   int            `json:"userid" form:"userid"`
+	BookAt   string         `json:"book_at" from:"book_at"`
+	PayAt    sql.NullString `json:"pay_at" form:"pay_at"`
+	Status   string         `json:"status" form:"status"`
 }
 
 func init() {
@@ -75,7 +75,6 @@ func main() {
 	//已訂門票資訊
 	router.GET("/tickets/:id", GetTickets)
 	router.Run(":8000")
-
 }
 
 // GetOne 獲得一條紀錄
