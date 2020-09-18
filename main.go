@@ -75,6 +75,7 @@ func main() {
 	//已訂門票資訊
 	router.GET("/tickets/:id", GetTickets)
 	router.Run(":8000")
+
 }
 
 // GetOne 獲得一條紀錄
@@ -245,15 +246,17 @@ func (d *Detail) Create() int64 {
 
 // GetRow 取得訂票資訊
 func (t *Ticket) GetRow() (tickets []Ticket, err error) {
-	rows, err := DB.Query("select id, event_num, userid, book_at, status from ticket where userid = ?", t.UserID)
+	rows, err := DB.Query("select id, event_num, userid, book_at, pay_at, status from ticket where userid = ?", 1)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	ticket := Ticket{}
 	for rows.Next() {
-		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.Status)
-		if err == nil {
+		ticket := Ticket{}
+		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.PayAt, &ticket.Status)
+		if err != nil {
 			log.Fatal(err)
 		}
-		tickets = append(tickets, ticket)
 	}
 	rows.Close()
 	return
