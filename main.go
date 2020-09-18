@@ -11,17 +11,20 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+//DB mysql
 var DB *sql.DB
 
+//User 訂票人資訊
 type User struct {
 	ID       int    `json:"id" form:"id"`
-	IdNumber string `json:"id_number" form:"id_number"`
+	IDNumber string `json:"id_number" form:"id_number"`
 	Mail     string `json:"mail" form:"mail"`
 	Name     string `json:"name" form:"name"`
 	Birth    string `json:"birthday" form:"bitrhday"`
 	Status   string `json:"status" form:"status"`
 }
 
+// Detail 表演場次細節
 type Detail struct {
 	EventNum  int    `json:"event_num" form:"event_num"`
 	Title     string `json:"title" form:"title"`
@@ -33,10 +36,11 @@ type Detail struct {
 	LimitSeat string `json:"limit_seat" form:"limit_seat"`
 }
 
+// Ticket 下單紀錄
 type Ticket struct {
 	ID       int    `json:"id" form:"id"`
 	EventNum int    `json:"event_num" form:"event_num"`
-	UserID   int    `json:"user" form:"user"`
+	UserID   int    `json:"userid" form:"userid"`
 	BookAt   string `json:"book_at" from:"book_at"`
 	PayAt    string `json:"pay_at" form:"pay_at"`
 	Status   string `json:"status" form:"status"`
@@ -73,7 +77,7 @@ func main() {
 	router.Run(":8000")
 }
 
-//獲得一條紀錄
+// GetOne 獲得一條紀錄
 func GetOne(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
@@ -86,16 +90,16 @@ func GetOne(c *gin.Context) {
 	})
 }
 
-//新增一位訂票者資訊
+// AddOne 新增一位訂票者資訊
 func AddOne(c *gin.Context) {
-	id_number := c.Request.FormValue("id_number")
+	IDNumber := c.Request.FormValue("id_number")
 	mail := c.Request.FormValue("mail")
 	name := c.Request.FormValue("name")
 	birthday := c.Request.FormValue("birthday")
 	status := c.Request.FormValue("status")
 
 	user := User{
-		IdNumber: id_number,
+		IDNumber: IDNumber,
 		Mail:     mail,
 		Name:     name,
 		Birth:    birthday,
@@ -109,7 +113,7 @@ func AddOne(c *gin.Context) {
 	})
 }
 
-//更改訂票人狀態 {0:註銷,1:正常}
+// UpdateUser 更改訂票人狀態 {0:註銷,1:正常}
 func UpdateUser(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
@@ -128,7 +132,7 @@ func UpdateUser(c *gin.Context) {
 	})
 }
 
-//獲得詳細表演場次資訊
+// GetOneDetail 獲得詳細表演場次資訊
 func GetOneDetail(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
@@ -141,24 +145,24 @@ func GetOneDetail(c *gin.Context) {
 	})
 }
 
-//新增一筆表演場次
+// AddOneDetail 新增一筆表演場次
 func AddOneDetail(c *gin.Context) {
 	title := c.Request.FormValue("title")
 	performer := c.Request.FormValue("performer")
-	ticket_price := c.Request.FormValue("ticket_price")
-	time_at := c.Request.FormValue("time_at")
-	book_from := c.Request.FormValue("book_from")
-	endbook_at := c.Request.FormValue("endbook_at")
-	limit_seat := c.Request.FormValue("limit_seat")
+	price := c.Request.FormValue("ticket_price")
+	timeat := c.Request.FormValue("time_at")
+	bookfrom := c.Request.FormValue("book_from")
+	endbookat := c.Request.FormValue("endbook_at")
+	limitseat := c.Request.FormValue("limit_seat")
 
 	d := Detail{
 		Title:     title,
 		Performer: performer,
-		Price:     ticket_price,
-		TimeAt:    time_at,
-		BookFrom:  book_from,
-		EndbookAt: endbook_at,
-		LimitSeat: limit_seat,
+		Price:     price,
+		TimeAt:    timeat,
+		BookFrom:  bookfrom,
+		EndbookAt: endbookat,
+		LimitSeat: limitseat,
 	}
 
 	id := d.Create()
@@ -166,9 +170,9 @@ func AddOneDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"msg": msg,
 	})
-
 }
 
+// GetTicket 取得一筆詳細資料
 func GetTicket(c *gin.Context) {
 	userids := c.Param("id")
 	userid, _ := strconv.Atoi(userids)
@@ -181,16 +185,18 @@ func GetTicket(c *gin.Context) {
 	})
 }
 
+// GetRow 取得一名使用者資料
 func (u *User) GetRow() (user User, err error) {
 	user = User{}
-	err = DB.QueryRow("SELECT id_number, mail, name, birthday, status FROM user WHERE id=?", u.ID).Scan(
-		&user.IdNumber, &user.Mail, &user.Name, &user.Birth, &user.Status)
+	err = DB.QueryRow("SELECT id, id_number, mail, name, birthday, status FROM user WHERE id=?", u.ID).Scan(
+		&user.ID, &user.IDNumber, &user.Mail, &user.Name, &user.Birth, &user.Status)
 	return
 }
 
+// Create 新增一筆使用者資料
 func (u *User) Create() int64 {
 	rs, err := DB.Exec("INSERT INTO user (id_number, mail, name, birthday, status) VALUES (?, ?, ?, ?, ?);",
-		u.IdNumber, u.Mail, u.Name, u.Birth, u.Status)
+		u.IDNumber, u.Mail, u.Name, u.Birth, u.Status)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -201,6 +207,7 @@ func (u *User) Create() int64 {
 	return id
 }
 
+// Update 更新使用者狀態
 func (u *User) Update() int64 {
 	rs, err := DB.Exec("update user set status = ? where id = ?;", u.Status, u.ID)
 	if err != nil {
@@ -213,6 +220,7 @@ func (u *User) Update() int64 {
 	return rows
 }
 
+// GetOne 取得一筆表演資訊
 func (d *Detail) GetOne() (detail Detail, err error) {
 	detail = Detail{}
 	err = DB.QueryRow("SELECT * from ticket_detail WHERE event_num = ?", d.EventNum).Scan(
@@ -220,6 +228,7 @@ func (d *Detail) GetOne() (detail Detail, err error) {
 	return
 }
 
+// Create 新增一筆表演資訊
 func (d *Detail) Create() int64 {
 	rs, err := DB.Exec("INSERT INTO ticket_detail (title, performer, ticket_price, time_at, book_from, endbook_at , limit_seat) VALUES (?, ?, ?, ?, ?, ?, ?);",
 		&d.Title, &d.Performer, &d.Price, &d.TimeAt, &d.BookFrom, &d.EndbookAt, &d.LimitSeat)
@@ -234,6 +243,7 @@ func (d *Detail) Create() int64 {
 	return id
 }
 
+// GetRow 取得一筆使用者資料
 func (t *Ticket) GetRow() (ticket Ticket, err error) {
 	ticket = Ticket{}
 	err = DB.QueryRow("select event_num, book_at, pay_at, status from ticket where userid = ?", t.UserID).Scan(
