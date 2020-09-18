@@ -26,7 +26,7 @@ type User struct {
 
 // Detail 表演場次細節
 type Detail struct {
-	EventNum  int    `json:"event_num" form:"event_num"`
+	ID        int    `json:"id" form:"id"`
 	Title     string `json:"title" form:"title"`
 	Performer string `json:"performer" form:"performer"`
 	Price     string `json:"ticket_price" form:"ticket_price"`
@@ -73,7 +73,7 @@ func main() {
 	router.POST("/detail", AddOneDetail)
 
 	//已訂門票資訊
-	router.GET("/ticket/:id", GetTicket)
+	router.GET("/tickets/:id", GetTickets)
 	router.Run(":8000")
 }
 
@@ -137,7 +137,7 @@ func GetOneDetail(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
 	d := Detail{
-		EventNum: id,
+		ID: id,
 	}
 	rs, _ := d.GetOne()
 	c.JSON(http.StatusOK, gin.H{
@@ -172,16 +172,16 @@ func AddOneDetail(c *gin.Context) {
 	})
 }
 
-// GetTicket 取得一筆詳細資料
-func GetTicket(c *gin.Context) {
+// GetTickets 取得一筆詳細資料
+func GetTickets(c *gin.Context) {
 	userids := c.Param("id")
 	userid, _ := strconv.Atoi(userids)
-	u := Ticket{
+	t := Ticket{
 		UserID: userid,
 	}
-	rs, _ := u.GetRow()
+	rs, _ := t.GetRow()
 	c.JSON(http.StatusOK, gin.H{
-		"result": rs,
+		"list": rs,
 	})
 }
 
@@ -223,8 +223,8 @@ func (u *User) Update() int64 {
 // GetOne 取得一筆表演資訊
 func (d *Detail) GetOne() (detail Detail, err error) {
 	detail = Detail{}
-	err = DB.QueryRow("SELECT * from ticket_detail WHERE event_num = ?", d.EventNum).Scan(
-		&detail.EventNum, &detail.Title, &detail.Performer, &detail.Price, &detail.TimeAt, &detail.BookFrom, &detail.EventNum, &detail.LimitSeat)
+	err = DB.QueryRow("SELECT id, title, performer, ticket_price, time_at, book_from, endbook_at, limit_seat from ticket_detail WHERE id = ?", d.ID).Scan(
+		&detail.ID, &detail.Title, &detail.Performer, &detail.Price, &detail.TimeAt, &detail.BookFrom, &detail.EndbookAt, &detail.LimitSeat)
 	return
 }
 
@@ -243,10 +243,20 @@ func (d *Detail) Create() int64 {
 	return id
 }
 
-// GetRow 取得一筆使用者資料
-func (t *Ticket) GetRow() (ticket Ticket, err error) {
-	ticket = Ticket{}
-	err = DB.QueryRow("select event_num, book_at, pay_at, status from ticket where userid = ?", t.UserID).Scan(
-		&ticket.EventNum, &ticket.BookAt, &ticket.PayAt, &ticket.Status)
+// GetRow 取得訂票資訊
+func (t *Ticket) GetRow() (tickets []Ticket, err error) {
+	rows, err := DB.Query("select id, event_num, userid, book_at, status from ticket where userid = ?", t.UserID)
+
+	for rows.Next() {
+		ticket := Ticket{}
+		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.Status)
+		if err != nil {
+			if err != nil {
+				log.Fatal(err)
+			}
+			tickets = append(tickets, ticket)
+		}
+	}
+	rows.Close()
 	return
 }
