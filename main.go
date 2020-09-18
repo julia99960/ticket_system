@@ -247,14 +247,13 @@ func (d *Detail) Create() int64 {
 func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 	rows, err := DB.Query("select id, event_num, userid, book_at, status from ticket where userid = ?", t.UserID)
 
+	ticket := Ticket{}
 	for rows.Next() {
-		ticket := Ticket{}
 		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.Status)
-		if err != nil {
-			tickets = append(tickets, ticket)
-		} else {
+		if err == nil {
 			log.Fatal(err)
 		}
+		tickets = append(tickets, ticket)
 	}
 	rows.Close()
 	return
