@@ -73,7 +73,7 @@ func main() {
 
 	//訂票紀錄
 	router.GET("/tickets/:userid", GetTickets)
-	router.POST("/tickets/:userid/:eventnum/:status", AddTicket)
+	router.POST("/ticket/:userid/:eventnum/:status", AddTicket)
 	router.PATCH("/ticket/:id/:status", UpdateTicket)
 	router.Run(":8000")
 }
@@ -322,7 +322,7 @@ func (t *Ticket) Create() int64 {
 
 // Update 更改注單狀態
 func (t *Ticket) Update() int64 {
-	rs, err := DB.Exec("UPDATE ticket SET status=? WHERE id=?;", t.Status, t.ID)	
+	rs, err := DB.Exec("UPDATE ticket SET status=? WHERE id=?;", t.Status, t.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
