@@ -38,17 +38,16 @@ type Detail struct {
 
 // Ticket 下單紀錄
 type Ticket struct {
-	ID       int            `json:"id" form:"id"`
-	EventNum int            `json:"event_num" form:"event_num"`
-	UserID   int            `json:"userid" form:"userid"`
-	BookAt   string         `json:"book_at" from:"book_at"`
-	PayAt    sql.NullString `json:"pay_at" form:"pay_at"`
-	Status   string         `json:"status" form:"status"`
+	ID       int    `json:"id" form:"id"`
+	EventNum int    `json:"event_num" form:"event_num"`
+	UserID   int    `json:"userid" form:"userid"`
+	BookAt   string `json:"book_at" from:"book_at"`
+	Status   string `json:"status" form:"status"`
 }
 
 func init() {
 	var err error
-	DB, err = sql.Open("mysql", "root:demoroot@tcp(127.0.0.1:3306)/ticket?charset=utf8mb4")
+	DB, err = sql.Open("mysql", "root:shupa0127@tcp(mysql:3306)/ticket?charset=utf8mb4")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -176,12 +175,16 @@ func AddOneDetail(c *gin.Context) {
 func GetTickets(c *gin.Context) {
 	userids := c.Param("id")
 	userid, _ := strconv.Atoi(userids)
+
 	t := Ticket{
 		UserID: userid,
 	}
+
 	rs, _ := t.GetRow()
+
+	fmt.Println(rs)
 	c.JSON(http.StatusOK, gin.H{
-		"list": rs,
+		"ticket_list": rs,
 	})
 }
 
@@ -245,17 +248,17 @@ func (d *Detail) Create() int64 {
 
 // GetRow 取得訂票資訊
 func (t *Ticket) GetRow() (tickets []Ticket, err error) {
-	rows, err := DB.Query("select id, event_num, userid, book_at, pay_at, status from ticket where userid = ?", 1)
+	rows, err := DB.Query("select id, event_num, userid, book_at, status from ticket where userid = ?", t.UserID)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	for rows.Next() {
-		ticket := Ticket{}
-		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.PayAt, &ticket.Status)
+		var ticket Ticket
+		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.Status)
 		if err != nil {
 			log.Fatal(err)
 		}
+		tickets = append(tickets, ticket)
 	}
 	rows.Close()
 	return
