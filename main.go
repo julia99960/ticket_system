@@ -72,7 +72,8 @@ func main() {
 	router.POST("/detail", AddOneDetail)
 
 	//已訂門票資訊
-	router.GET("/tickets/:id", GetTickets)
+	router.GET("/tickets/:userid", GetTickets)
+	router.POST("/ticket/:userid/:eventnum", AddTicket)
 	router.Run(":8000")
 }
 
@@ -173,7 +174,7 @@ func AddOneDetail(c *gin.Context) {
 
 // GetTickets 取得一筆詳細資料
 func GetTickets(c *gin.Context) {
-	userids := c.Param("id")
+	userids := c.Param("userid")
 	userid, _ := strconv.Atoi(userids)
 
 	t := Ticket{
@@ -185,6 +186,26 @@ func GetTickets(c *gin.Context) {
 	fmt.Println(rs)
 	c.JSON(http.StatusOK, gin.H{
 		"ticket_list": rs,
+	})
+}
+
+// AddTicket 新增一筆訂票紀錄
+func AddTicket(c *gin.Context) {
+	userids := c.Param("userid")
+	eventnums := c.Param("eventnum")
+	userid, _ := strconv.Atoi(userids)
+	eventnum, _ := strconv.Atoi(eventnums)
+	status := c.Request.FormValue("status")
+	t := Ticket{
+		UserID:   userid,
+		EventNum: eventnum,
+		Status:   status,
+	}
+
+	id := t.Create()
+	msg := fmt.Sprintf("insert successful %d", id)
+	c.JSON(http.StatusOK, gin.H{
+		"msg": msg,
 	})
 }
 
@@ -262,4 +283,19 @@ func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 	}
 	rows.Close()
 	return
+}
+
+// Create 新增一筆訂票資訊
+func (t *Ticket) Create() int64 {
+	rs, err := DB.Exec("INSERT INTO ticket (event_num, userid, status) VALUES (?, ?, ?);",
+		&t.EventNum, &t.UserID, &t.Status)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	id, err := rs.LastInsertId()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return id
 }
