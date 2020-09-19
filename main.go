@@ -42,7 +42,7 @@ type Ticket struct {
 	EventNum int    `json:"event_num" form:"event_num"`
 	UserID   int    `json:"userid" form:"userid"`
 	BookAt   string `json:"book_at" from:"book_at"`
-	Status   string `json:"status" form:"status"`
+	Status   int    `json:"status" form:"status"`
 }
 
 func init() {
@@ -71,9 +71,10 @@ func main() {
 	router.GET("/detail/:id", GetOneDetail)
 	router.POST("/detail", AddOneDetail)
 
-	//已訂門票資訊
+	//訂票紀錄
 	router.GET("/tickets/:userid", GetTickets)
-	router.POST("/ticket/:userid/:eventnum", AddTicket)
+	router.POST("/tickets/:userid/:eventnum/:status", AddTicket)
+	router.PATCH("/ticket/:id/:status", UpdateTicket)
 	router.Run(":8000")
 }
 
@@ -193,9 +194,11 @@ func GetTickets(c *gin.Context) {
 func AddTicket(c *gin.Context) {
 	userids := c.Param("userid")
 	eventnums := c.Param("eventnum")
+	statuss := c.Param("status")
 	userid, _ := strconv.Atoi(userids)
 	eventnum, _ := strconv.Atoi(eventnums)
-	status := c.Request.FormValue("status")
+	status, _ := strconv.Atoi(statuss)
+
 	t := Ticket{
 		UserID:   userid,
 		EventNum: eventnum,
@@ -204,6 +207,23 @@ func AddTicket(c *gin.Context) {
 
 	id := t.Create()
 	msg := fmt.Sprintf("insert successful %d", id)
+	c.JSON(http.StatusOK, gin.H{
+		"msg": msg,
+	})
+}
+
+// UpdateTicket 更改訂票紀錄 {0:註銷,1:正常}
+func UpdateTicket(c *gin.Context) {
+	ids := c.Param("id")
+	statuss := c.Param("status")
+	id, _ := strconv.Atoi(ids)
+	status, _ := strconv.Atoi(statuss)
+	t := Ticket{
+		ID:     id,
+		Status: status,
+	}
+	row := t.Update()
+	msg := fmt.Sprintf("updated successful %d", row)
 	c.JSON(http.StatusOK, gin.H{
 		"msg": msg,
 	})
@@ -298,4 +318,17 @@ func (t *Ticket) Create() int64 {
 		log.Fatal(err)
 	}
 	return id
+}
+
+// Update 更改注單狀態
+func (t *Ticket) Update() int64 {
+	rs, err := DB.Exec("UPDATE ticket SET status=? WHERE id=?;", t.Status, t.ID)	
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := rs.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return rows
 }
