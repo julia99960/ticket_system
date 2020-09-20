@@ -184,21 +184,28 @@ func AddOneDetail(c *gin.Context) {
 	})
 }
 
-// GetTickets 取得一筆詳細資料
+// GetTickets 取得使用者訂票紀錄
 func GetTickets(c *gin.Context) {
 	userids := c.Param("userid")
 	userid, _ := strconv.Atoi(userids)
 
+	tickets, err := GetTicketsList(userid)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"ticket_list": tickets,
+	})
+}
+
+// GetTicketsList 取得使用者購票紀錄
+func GetTicketsList(userid int) (tickets []Ticket, err error) {
 	t := Ticket{
 		UserID: userid,
 	}
-
-	rs, _ := t.GetRow()
-
-	fmt.Println(rs)
-	c.JSON(http.StatusOK, gin.H{
-		"ticket_list": rs,
-	})
+	tickets, err = t.GetRow()
+	return
 }
 
 // AddTicket 新增一筆訂票紀錄
