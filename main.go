@@ -43,6 +43,7 @@ type Ticket struct {
 	UserID   int    `json:"userid" form:"userid"`
 	BookAt   string `json:"book_at" from:"book_at"`
 	Status   int    `json:"status" form:"status"`
+	Detail
 }
 
 func init() {
@@ -318,6 +319,12 @@ func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 			log.Fatal(err)
 		}
 
+		rs, err := GetPerformanceDetail(ticket.EventNum)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ticket.Detail = rs
 		tickets = append(tickets, ticket)
 	}
 	rows.Close()
