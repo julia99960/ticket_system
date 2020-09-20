@@ -84,11 +84,14 @@ func GetOne(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
 	rs, err := GetOneUser(id)
-	if err != nil {
-		log.Fatal(err)
+
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"result": rs,
+		})
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"result": rs,
+		"result": nil,
 	})
 }
 
@@ -260,11 +263,8 @@ func UpdateTicket(c *gin.Context) {
 // GetRow 取得一名使用者資料
 func (u *User) GetRow() (user User, err error) {
 	user = User{}
-	errs := DB.QueryRow("SELECT id, id_number, mail, name, birthday, status FROM user WHERE id=?", u.ID).Scan(
+	err = DB.QueryRow("SELECT id, id_number, mail, name, birthday, status FROM user WHERE id=?", u.ID).Scan(
 		&user.ID, &user.IDNumber, &user.Mail, &user.Name, &user.Birth, &user.Status)
-	if errs == sql.ErrNoRows {
-		return User{}, err
-	}
 	return
 }
 
