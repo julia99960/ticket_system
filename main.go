@@ -137,13 +137,24 @@ func UpdateUser(c *gin.Context) {
 func GetOneDetail(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
-	d := Detail{
-		ID: id,
+	detail, err := GetPerformanceDetail(id)
+
+	if err != nil {
+		log.Fatal(err)
 	}
-	rs, _ := d.GetOne()
+
 	c.JSON(http.StatusOK, gin.H{
-		"result": rs,
+		"result": detail,
 	})
+}
+
+// GetPerformanceDetail 獲取表演場次細節
+func GetPerformanceDetail(ida int) (detail Detail, err error) {
+	d := Detail{
+		ID: ida,
+	}
+	detail, err = d.GetOne()
+	return
 }
 
 // AddOneDetail 新增一筆表演場次
@@ -289,7 +300,7 @@ func (d *Detail) Create() int64 {
 
 // GetRow 取得訂票資訊
 func (t *Ticket) GetRow() (tickets []Ticket, err error) {
-	rows, err := DB.Query("select id, event_num, userid, book_at, status from ticket where userid = ?", t.UserID)
+	rows, err := DB.Query("select * from ticket where userid = ?", t.UserID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -299,6 +310,7 @@ func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		tickets = append(tickets, ticket)
 	}
 	rows.Close()
