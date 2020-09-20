@@ -21,7 +21,7 @@ type User struct {
 	Mail     string `json:"mail" form:"mail"`
 	Name     string `json:"name" form:"name"`
 	Birth    string `json:"birthday" form:"bitrhday"`
-	Status   string `json:"status" form:"status"`
+	Status   int    `json:"status" form:"status"`
 }
 
 // Detail 表演場次細節
@@ -66,7 +66,7 @@ func main() {
 	//訂票者資訊
 	router.GET("/user/:id", GetOne)
 	router.POST("user", AddOne)
-	router.PATCH("user/:id", UpdateUser)
+	router.PATCH("/user/:id/:status", UpdateUser)
 
 	//表演詳細資料
 	router.GET("/detail/:id", GetOneDetail)
@@ -79,7 +79,7 @@ func main() {
 	router.Run(":8000")
 }
 
-// GetOne 獲得一條紀錄
+// GetOne 取得一筆使用者資料
 func GetOne(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
@@ -110,7 +110,8 @@ func AddOne(c *gin.Context) {
 	mail := c.Request.FormValue("mail")
 	name := c.Request.FormValue("name")
 	birthday := c.Request.FormValue("birthday")
-	status := c.Request.FormValue("status")
+	sta := c.Request.FormValue("status")
+	status, _ := strconv.Atoi(sta)
 
 	user := User{
 		IDNumber: IDNumber,
@@ -127,23 +128,32 @@ func AddOne(c *gin.Context) {
 	})
 }
 
-// UpdateUser 更改訂票人狀態 {0:註銷,1:正常}
+// UpdateUser 更改訂票人狀態
 func UpdateUser(c *gin.Context) {
 	ids := c.Param("id")
+	status1 := c.Param("status")
 	id, _ := strconv.Atoi(ids)
-	u := User{
-		ID: id,
-	}
-	status := c.Request.FormValue("status")
-	user := User{
-		ID:     u.ID,
-		Status: status,
-	}
-	row := user.Update()
+	status, _ := strconv.Atoi(status1)
+
+	row := UpdateUserStatus(id, status)
 	msg := fmt.Sprintf("updated successful %d", row)
 	c.JSON(http.StatusOK, gin.H{
 		"msg": msg,
 	})
+}
+
+// UpdateUserStatus 更新使用者狀態{0:註銷,1:正常}
+func UpdateUserStatus(id, status int) (row int64) {
+	if status == 0 || status == 1 {
+		user := User{
+			ID:     id,
+			Status: status,
+		}
+		row = user.Update()
+		return
+	}
+
+	return 0
 }
 
 // GetOneDetail 獲得詳細表演場次資訊
