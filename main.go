@@ -48,7 +48,8 @@ type Ticket struct {
 
 func init() {
 	var err error
-	DB, err = sql.Open("mysql", "root:shupa0127@tcp(mysql:3306)/ticket?charset=utf8mb4")
+	// DB, err = sql.Open("mysql", "root:shupa0127@tcp(mysql:3306)/ticket?charset=utf8mb4")
+	DB, err = sql.Open("mysql", "root:demoroot@tcp(127.0.0.1:3306)/ticket?charset=utf8mb4")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -89,10 +90,11 @@ func GetOne(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"result": rs,
 		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"result": nil,
+		})
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"result": nil,
-	})
 }
 
 // GetOneUser 取得一筆使用者資料
