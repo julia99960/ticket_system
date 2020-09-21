@@ -219,12 +219,16 @@ func GetTickets(c *gin.Context) {
 
 	tickets, err := GetTicketsList(userid)
 
-	if err != nil {
-		log.Fatal(err)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"ticket_list": tickets,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"ticket_list": nil,
+		})
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"ticket_list": tickets,
-	})
+
 }
 
 // GetTicketsList 取得使用者購票紀錄
