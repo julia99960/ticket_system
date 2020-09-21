@@ -66,7 +66,7 @@ func main() {
 
 	//訂票者資訊
 	router.GET("/user/:id", GetOne)
-	router.POST("user", AddOne)
+	router.POST("/user", AddOne)
 	router.PATCH("/user/:id/:status", UpdateUser)
 
 	//表演詳細資料
