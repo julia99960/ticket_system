@@ -164,13 +164,16 @@ func GetOneDetail(c *gin.Context) {
 	id, _ := strconv.Atoi(ids)
 	detail, err := GetPerformanceDetail(id)
 
-	if err != nil {
-		log.Fatal(err)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"result": detail,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"result": nil,
+		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"result": detail,
-	})
 }
 
 // GetPerformanceDetail 獲取表演場次細節
