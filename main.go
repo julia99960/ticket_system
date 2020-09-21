@@ -352,7 +352,7 @@ func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 
 		rs, err := GetPerformanceDetail(ticket.EventNum)
 		if err != nil {
-			log.Fatal(err)
+			rs = Detail{}
 		}
 
 		ticket.Detail = rs
