@@ -268,15 +268,26 @@ func UpdateTicket(c *gin.Context) {
 	statuss := c.Param("status")
 	id, _ := strconv.Atoi(ids)
 	status, _ := strconv.Atoi(statuss)
-	t := Ticket{
-		ID:     id,
-		Status: status,
-	}
-	row := t.Update()
+
+	row := UpdateTicketStatus(id, status)
 	msg := fmt.Sprintf("updated successful %d", row)
 	c.JSON(http.StatusOK, gin.H{
 		"msg": msg,
 	})
+}
+
+// UpdateTicketStatus 更改訂票紀錄 {0:註銷,1:正常}
+func UpdateTicketStatus(id, status int) int64 {
+	if id == 0 || status == 1 {
+		t := Ticket{
+			ID:     id,
+			Status: status,
+		}
+		row := t.Update()
+		return row
+	}
+
+	return 0
 }
 
 // GetRow 取得一名使用者資料
