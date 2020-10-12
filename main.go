@@ -43,13 +43,14 @@ type Ticket struct {
 	UserID   int    `json:"userid" form:"userid"`
 	BookAt   string `json:"book_at" from:"book_at"`
 	Status   int    `json:"status" form:"status"`
+	Sum      int    `json:"sum" form:"sum"`
 	Detail
 }
 
 func init() {
 	var err error
-	// DB, err = sql.Open("mysql", "root:shupa0127@tcp(mysql:3306)/ticket?charset=utf8mb4")
-	DB, err = sql.Open("mysql", "root:demoroot@tcp(127.0.0.1:3306)/ticket?charset=utf8mb4")
+	DB, err = sql.Open("mysql", "root:shupa0127@tcp(mysql:3306)/ticket?charset=utf8mb4")
+	// DB, err = sql.Open("mysql", "root:demoroot@tcp(127.0.0.1:3306)/ticket?charset=utf8mb4")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -115,7 +116,7 @@ func AddOne(c *gin.Context) {
 	sta := c.Request.FormValue("status")
 	status, _ := strconv.Atoi(sta)
 
-	user := User{
+	u := User{
 		IDNumber: IDNumber,
 		Mail:     mail,
 		Name:     name,
@@ -123,11 +124,17 @@ func AddOne(c *gin.Context) {
 		Status:   status,
 	}
 
-	id := user.Create()
+	id := u.AddOneUser()
 	msg := fmt.Sprintf("insert successful %d", id)
 	c.JSON(http.StatusOK, gin.H{
 		"msg": msg,
 	})
+}
+
+// AddOneUser 新增一筆使用者資料
+func (u *User) AddOneUser() int64 {
+	id := u.Create()
+	return id
 }
 
 // UpdateUser 更改訂票人狀態
