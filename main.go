@@ -33,7 +33,7 @@ type Detail struct {
 	TimeAt    string `json:"time_at" form:"time_at"`
 	BookFrom  string `json:"book_from" form:"book_from"`
 	EndbookAt string `json:"endbook_at" form:"endbook_at"`
-	LimitSeat string `json:"limit_seat" form:"limit_seat"`
+	LimitSeat int    `json:"limit_seat" form:"limit_seat"`
 }
 
 // Ticket 下單紀錄
@@ -73,6 +73,9 @@ func main() {
 	//表演詳細資料
 	router.GET("/detail/:id", GetOneDetail)
 	router.POST("/detail", AddOneDetail)
+
+	//總計某一場次剩餘票數
+	router.GET("/remain_tickets/:eventnum", GetRemainTicket)
 
 	//訂票紀錄
 	router.GET("/tickets/:userid", GetTickets)
@@ -200,7 +203,8 @@ func AddOneDetail(c *gin.Context) {
 	timeat := c.Request.FormValue("time_at")
 	bookfrom := c.Request.FormValue("book_from")
 	endbookat := c.Request.FormValue("endbook_at")
-	limitseat := c.Request.FormValue("limit_seat")
+	limitseats := c.Request.FormValue("limit_seat")
+	limitseat, _ := strconv.Atoi(limitseats)
 
 	d := Detail{
 		Title:     title,
@@ -235,7 +239,6 @@ func GetTickets(c *gin.Context) {
 			"ticket_list": nil,
 		})
 	}
-
 }
 
 // GetTicketsList 取得使用者購票紀錄
@@ -283,6 +286,44 @@ func UpdateTicket(c *gin.Context) {
 	})
 }
 
+// GetRemainTicket 總計某一場次剩餘票數
+func GetRemainTicket(c *gin.Context) {
+	eventnums := c.Param("eventnum")
+	eventnum, _ := strconv.Atoi(eventnums)
+	row := RemainTicket(eventnum)
+	c.JSON(http.StatusOK, gin.H{
+		"data": row,
+	})
+}
+
+// RemainTicket 剩餘票數
+func RemainTicket(eventnum int) int {
+	t := Ticket{
+		EventNum: eventnum,
+	}
+
+	rows, err := t.GetSumTiket()
+
+	if err != nil {
+		return 0
+	}
+
+	sum := rows.Sum
+
+	d := Detail{
+		ID: eventnum,
+	}
+
+	rows1, err := d.GetLimitSeat()
+
+	if err != nil {
+		return 0
+	}
+
+	limitseat := rows1.LimitSeat
+	return limitseat - sum
+}
+
 // UpdateTicketStatus 更改訂票紀錄 {0:註銷,1:正常}
 func UpdateTicketStatus(id, status int) int64 {
 	if id == 0 || status == 1 {
@@ -293,7 +334,6 @@ func UpdateTicketStatus(id, status int) int64 {
 		row := t.Update()
 		return row
 	}
-
 	return 0
 }
 
@@ -406,4 +446,20 @@ func (t *Ticket) Update() int64 {
 		log.Fatal(err)
 	}
 	return rows
+}
+
+// GetSumTiket 統計同一場次票數
+func (t *Ticket) GetSumTiket() (ticket Ticket, err error) {
+	ticket = Ticket{}
+	err = DB.QueryRow("select count(event_num) as Sum from ticket where event_num=?;", t.EventNum).Scan(
+		&ticket.Sum)
+	return
+}
+
+// GetLimitSeat 釋放座位數量
+func (d *Detail) GetLimitSeat() (detail Detail, err error) {
+	detail = Detail{}
+	err = DB.QueryRow("select limit_seat as LimitSeat from ticket_detail where id=?;", d.ID).Scan(
+		&detail.LimitSeat)
+	return
 }
