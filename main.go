@@ -40,7 +40,7 @@ type Detail struct {
 type Ticket struct {
 	ID       int    `json:"id" form:"id"`
 	EventNum int    `json:"event_num" form:"event_num"`
-	UserID   int    `json:"userid" form:"userid"`
+	UserID   int    `json:"user_id" form:"user_id"`
 	BookAt   string `json:"book_at" from:"book_at"`
 	Status   int    `json:"status" form:"status"`
 	Sum      int    `json:"sum" form:"sum"`
@@ -65,22 +65,23 @@ func main() {
 
 	router := gin.Default()
 
-	//訂票者資訊
-	router.GET("/user/:id", GetOne)
-	router.POST("/user", AddOne)
-	router.PATCH("/user/:id/:status", UpdateUser)
-
 	//表演詳細資料
-	router.GET("/detail/:id", GetOneDetail)
+	router.GET("/ticket/:id/detail", GetOneDetail)
 	router.POST("/detail", AddOneDetail)
 
 	//總計某一場次剩餘票數
-	router.GET("/remain_tickets/:eventnum", GetRemainTicket)
+	router.GET("/remain_tickets/:event_num", GetRemainTicket)
 
 	//訂票紀錄
-	router.GET("/tickets/:userid", GetTickets)
-	router.POST("/ticket/:userid/:eventnum/:status", AddTicket)
-	router.PATCH("/ticket/:id/:status", UpdateTicket)
+	router.GET("/ticket/:user_id/tickets", GetTickets)
+	router.POST("/ticket/:event_num", AddTicket)
+	router.PATCH("/ticket/:id/status", UpdateTicket)
+
+	//訂票者資訊
+	router.GET("/user/:id", GetOne)
+	router.POST("/user", AddOne)
+	router.PATCH("/user/:id/status", UpdateUser)
+
 	router.Run(":8000")
 }
 
@@ -143,7 +144,7 @@ func (u *User) AddOneUser() int64 {
 // UpdateUser 更改訂票人狀態
 func UpdateUser(c *gin.Context) {
 	ids := c.Param("id")
-	status1 := c.Param("status")
+	status1 := c.Request.FormValue("status")
 	id, _ := strconv.Atoi(ids)
 	status, _ := strconv.Atoi(status1)
 
@@ -225,7 +226,7 @@ func AddOneDetail(c *gin.Context) {
 
 // GetTickets 取得使用者訂票紀錄
 func GetTickets(c *gin.Context) {
-	userids := c.Param("userid")
+	userids := c.Param("user_id")
 	userid, _ := strconv.Atoi(userids)
 
 	tickets, err := GetTicketsList(userid)
@@ -252,9 +253,9 @@ func GetTicketsList(userid int) (tickets []Ticket, err error) {
 
 // AddTicket 新增一筆訂票紀錄
 func AddTicket(c *gin.Context) {
-	userids := c.Param("userid")
-	eventnums := c.Param("eventnum")
-	statuss := c.Param("status")
+	eventnums := c.Param("event_num")
+	userids := c.Request.FormValue("user_id")
+	statuss := c.Request.FormValue("status")
 	userid, _ := strconv.Atoi(userids)
 	eventnum, _ := strconv.Atoi(eventnums)
 	status, _ := strconv.Atoi(statuss)
@@ -275,7 +276,7 @@ func AddTicket(c *gin.Context) {
 // UpdateTicket 更改訂票紀錄 {0:註銷,1:正常}
 func UpdateTicket(c *gin.Context) {
 	ids := c.Param("id")
-	statuss := c.Param("status")
+	statuss := c.Request.FormValue("status")
 	id, _ := strconv.Atoi(ids)
 	status, _ := strconv.Atoi(statuss)
 
@@ -288,7 +289,7 @@ func UpdateTicket(c *gin.Context) {
 
 // GetRemainTicket 總計某一場次剩餘票數
 func GetRemainTicket(c *gin.Context) {
-	eventnums := c.Param("eventnum")
+	eventnums := c.Param("event_num")
 	eventnum, _ := strconv.Atoi(eventnums)
 	row := RemainTicket(eventnum)
 	c.JSON(http.StatusOK, gin.H{
@@ -397,7 +398,7 @@ func (d *Detail) Create() int64 {
 
 // GetRow 取得訂票資訊
 func (t *Ticket) GetRow() (tickets []Ticket, err error) {
-	rows, err := DB.Query("select * from ticket where userid = ?", t.UserID)
+	rows, err := DB.Query("select * from ticket where user_id = ?", t.UserID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -422,7 +423,7 @@ func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 
 // Create 新增一筆訂票資訊
 func (t *Ticket) Create() int64 {
-	rs, err := DB.Exec("INSERT INTO ticket (event_num, userid, status) VALUES (?, ?, ?);",
+	rs, err := DB.Exec("INSERT INTO ticket (event_num, user_id, status) VALUES (?, ?, ?);",
 		&t.EventNum, &t.UserID, &t.Status)
 
 	if err != nil {
