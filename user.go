@@ -8,6 +8,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//User 訂票人資訊
+type User struct {
+	ID       int    `json:"id" form:"id"`
+	IDNumber string `json:"id_number" form:"id_number"`
+	Mail     string `json:"mail" form:"mail"`
+	Name     string `json:"name" form:"name"`
+	Birth    string `json:"birthday" form:"bitrhday"`
+	Status   int    `json:"status" form:"status"`
+}
+
 // GetOne 取得一筆使用者資料
 func GetOne(c *gin.Context) {
 	ids := c.Param("id")

@@ -8,6 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Ticket 下單紀錄
+type Ticket struct {
+	ID       int    `json:"id" form:"id"`
+	EventNum int    `json:"event_num" form:"event_num"`
+	UserID   int    `json:"user_id" form:"user_id"`
+	BookAt   string `json:"book_at" from:"book_at"`
+	Status   int    `json:"status" form:"status"`
+	Sum      int    `json:"sum" form:"sum"`
+	Detail
+}
+
 // GetTickets 取得使用者訂票紀錄
 func GetTickets(c *gin.Context) {
 	userids := c.Param("user_id")
