@@ -1,13 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
-)
-
 // Ticket 下單紀錄
 type Ticket struct {
 	ID       int    `json:"id" form:"id"`
@@ -19,24 +11,6 @@ type Ticket struct {
 	Detail
 }
 
-// GetTickets 取得使用者訂票紀錄
-func GetTickets(c *gin.Context) {
-	userids := c.Param("user_id")
-	userid, _ := strconv.Atoi(userids)
-
-	tickets, err := GetTicketsList(userid)
-
-	if err == nil {
-		c.JSON(http.StatusOK, gin.H{
-			"ticket_list": tickets,
-		})
-	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"ticket_list": nil,
-		})
-	}
-}
-
 // GetTicketsList 取得使用者購票紀錄
 func GetTicketsList(userid int) (tickets []Ticket, err error) {
 	t := Ticket{
@@ -44,42 +18,6 @@ func GetTicketsList(userid int) (tickets []Ticket, err error) {
 	}
 	tickets, err = t.GetRow()
 	return
-}
-
-// AddTicket 新增一筆訂票紀錄
-func AddTicket(c *gin.Context) {
-	eventnums := c.Param("event_num")
-	userids := c.Request.FormValue("user_id")
-	statuss := c.Request.FormValue("status")
-	userid, _ := strconv.Atoi(userids)
-	eventnum, _ := strconv.Atoi(eventnums)
-	status, _ := strconv.Atoi(statuss)
-
-	t := Ticket{
-		UserID:   userid,
-		EventNum: eventnum,
-		Status:   status,
-	}
-
-	id := t.Create()
-	msg := fmt.Sprintf("insert successful %d", id)
-	c.JSON(http.StatusOK, gin.H{
-		"msg": msg,
-	})
-}
-
-// UpdateTicket 更改訂票紀錄 {0:註銷,1:正常}
-func UpdateTicket(c *gin.Context) {
-	ids := c.Param("id")
-	statuss := c.Request.FormValue("status")
-	id, _ := strconv.Atoi(ids)
-	status, _ := strconv.Atoi(statuss)
-
-	row := UpdateTicketStatus(id, status)
-	msg := fmt.Sprintf("updated successful %d", row)
-	c.JSON(http.StatusOK, gin.H{
-		"msg": msg,
-	})
 }
 
 // UpdateTicketStatus 更改訂票紀錄 {0:註銷,1:正常}
@@ -93,16 +31,6 @@ func UpdateTicketStatus(id, status int) int64 {
 		return row
 	}
 	return 0
-}
-
-// GetRemainTicket 總計某一場次剩餘票數
-func GetRemainTicket(c *gin.Context) {
-	eventnums := c.Param("event_num")
-	eventnum, _ := strconv.Atoi(eventnums)
-	row := RemainTicket(eventnum)
-	c.JSON(http.StatusOK, gin.H{
-		"data": row,
-	})
 }
 
 // RemainTicket 剩餘票數
