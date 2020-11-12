@@ -8,14 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AddTicket 新增一筆訂票紀錄
-func AddTicket(c *gin.Context) {
-	eventnums := c.Param("event_num")
-	userids := c.Request.FormValue("user_id")
-	statuss := c.Request.FormValue("status")
-	userid, _ := strconv.Atoi(userids)
-	eventnum, _ := strconv.Atoi(eventnums)
-	status, _ := strconv.Atoi(statuss)
+// CreateTicket 新增一筆訂票紀錄
+func CreateTicket(c *gin.Context) {
+	eventnum, _ := strconv.Atoi(c.Param("event_num"))
+	userid, _ := strconv.Atoi(c.Request.FormValue("user_id"))
+	status, _ := strconv.Atoi(c.Request.FormValue("status"))
 
 	t := Ticket{
 		UserID:   userid,
@@ -32,9 +29,7 @@ func AddTicket(c *gin.Context) {
 
 // GetTickets 取得使用者訂票紀錄
 func GetTickets(c *gin.Context) {
-	userids := c.Param("user_id")
-	userid, _ := strconv.Atoi(userids)
-
+	userid, _ := strconv.Atoi(c.Param("user_id"))
 	tickets, err := GetTicketsList(userid)
 
 	if err == nil {

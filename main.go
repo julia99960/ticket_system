@@ -11,7 +11,7 @@ func main() {
 	router := gin.Default()
 
 	//訂票紀錄
-	router.POST("/ticket/:event_num/user_id", AddTicket)      //一次下一張單
+	router.POST("/ticket/:event_num/user_id", CreateTicket)   //一次下一張單
 	router.GET("/ticket/:user_id/tickets", GetTickets)        //查詢訂票資料
 	router.PATCH("/ticket/:id/status", UpdateTicket)          //更改注單狀態
 	router.GET("/remain_tickets/:event_num", GetRemainTicket) //總計某一場次剩餘票數
