@@ -129,11 +129,16 @@ func AddOne(c *gin.Context) {
 		Status:   status,
 	}
 
-	id := u.AddOneUser()
-	msg := fmt.Sprintf("insert successful %d", id)
-	c.JSON(http.StatusOK, gin.H{
-		"msg": msg,
-	})
+	row := u.AddOneUser()
+	if row == 1 {
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "success",
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "unsuccess",
+		})
+	}
 }
 
 // GetOne 取得一筆使用者資料

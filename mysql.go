@@ -32,16 +32,16 @@ func (u *User) GetRow() (user User, err error) {
 
 // Create 新增一筆使用者資料
 func (u *User) Create() int64 {
-	rs, err := DB.Exec("INSERT INTO user (id_number, mail, name, birthday, status) VALUES (?, ?, ?, ?, ?);",
+	rs, err := DB.Exec("INSERT IGNORE user (id_number, mail, name, birthday, status) VALUES (?, ?, ?, ?, ?);",
 		u.IDNumber, u.Mail, u.Name, u.Birth, u.Status)
 	if err != nil {
-		log.Fatal(err)
+		return 0
 	}
-	id, err := rs.LastInsertId()
-	if err != nil {
-		log.Fatal(err)
+	row, err := rs.RowsAffected()
+	if err == nil && row != 0 {
+		return 1
 	}
-	return id
+	return 0
 }
 
 // Update 更新使用者狀態

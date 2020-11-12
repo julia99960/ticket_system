@@ -21,8 +21,8 @@ func GetOneUser(id int) (user User, err error) {
 
 // AddOneUser 新增一筆使用者資料
 func (u *User) AddOneUser() int64 {
-	id := u.Create()
-	return id
+	row := u.Create()
+	return row
 }
 
 // UpdateUserStatus 更新使用者狀態{0:註銷,1:正常}
