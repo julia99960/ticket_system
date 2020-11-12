@@ -5,6 +5,16 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+//資料庫連線資訊
+const (
+	USERNAME = "root"
+	PASSWORD = "demoroot" // shupa0127
+	NETWORK  = "tcp"
+	SERVER   = "127.0.0.1" // mysql
+	PORT     = "3306"
+	DATABASE = "ticket"
+)
+
 func main() {
 	defer DB.Close()
 

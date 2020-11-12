@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 )
 
@@ -10,8 +11,8 @@ var DB *sql.DB
 
 func init() {
 	var err error
-	DB, err = sql.Open("mysql", "root:shupa0127@tcp(mysql:3306)/ticket?charset=utf8mb4")
-	// DB, err = sql.Open("mysql", "root:demoroot@tcp(127.0.0.1:3306)/ticket?charset=utf8mb4")
+	conn := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8mb4", USERNAME, PASSWORD, NETWORK, SERVER, PORT, DATABASE)
+	DB, err = sql.Open("mysql", conn)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
