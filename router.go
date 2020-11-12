@@ -51,10 +51,15 @@ func UpdateTicket(c *gin.Context) {
 	status, _ := strconv.Atoi(statuss)
 
 	row := UpdateTicketStatus(id, status)
-	msg := fmt.Sprintf("updated successful %d", row)
-	c.JSON(http.StatusOK, gin.H{
-		"msg": msg,
-	})
+	if row == 1 {
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "success",
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "unsuccess",
+		})
+	}
 }
 
 // GetRemainTicket 總計某一場次剩餘票數

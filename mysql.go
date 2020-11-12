@@ -124,13 +124,13 @@ func (t *Ticket) Create() int64 {
 func (t *Ticket) Update() int64 {
 	rs, err := DB.Exec("UPDATE ticket SET status=? WHERE id=?;", t.Status, t.ID)
 	if err != nil {
-		log.Fatal(err)
+		return 0
 	}
-	rows, err := rs.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
+	row, err := rs.RowsAffected()
+	if err == nil && row == 1 {
+		return 1
 	}
-	return rows
+	return 0
 }
 
 // GetSumTiket 統計同一場次票數
