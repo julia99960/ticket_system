@@ -143,8 +143,7 @@ func AddOne(c *gin.Context) {
 
 // GetOne 取得一筆使用者資料
 func GetOne(c *gin.Context) {
-	ids := c.Param("id")
-	id, _ := strconv.Atoi(ids)
+	id, _ := strconv.Atoi(c.Param("id"))
 	rs, err := GetOneUser(id)
 
 	if err == nil {
@@ -166,8 +165,14 @@ func UpdateUser(c *gin.Context) {
 	status, _ := strconv.Atoi(status1)
 
 	row := UpdateUserStatus(id, status)
-	msg := fmt.Sprintf("updated successful %d", row)
-	c.JSON(http.StatusOK, gin.H{
-		"msg": msg,
-	})
+
+	if row == 1 {
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "success",
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "unsuccess",
+		})
+	}
 }

@@ -48,13 +48,13 @@ func (u *User) Create() int64 {
 func (u *User) Update() int64 {
 	rs, err := DB.Exec("update user set status = ? where id = ?;", u.Status, u.ID)
 	if err != nil {
-		log.Fatal(err)
+		return 0
 	}
-	rows, err := rs.RowsAffected()
-	if err != nil {
-		log.Fatal(err)
+	row, err := rs.RowsAffected()
+	if err == nil && row != 0 {
+		return row
 	}
-	return rows
+	return 0
 }
 
 // GetOne 取得一筆表演資訊
