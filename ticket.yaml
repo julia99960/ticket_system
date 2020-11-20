@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Ticket API
+  description: 訂票系統API
+servers:
+  - url: 'http://127.0.0.1:8000'
+paths:
+  '/user/{id}':
+    get:
+      summary: Returns a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 用userID取得使用者資料
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+             schema:
+                properties:
+                  id_number:
+                    type: integer
+                  mail:
+                    type: string
+                  name:
+                    type: string
+                  birthday:
+                    type: string
+                  status:
+                    type: string
