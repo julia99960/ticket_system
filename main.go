@@ -1,21 +1,40 @@
 package main
 
 import (
+	"flag"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-//資料庫連線資訊
+var nFlag = flag.Int("n", 1, "help message for flag n")
+
+//本地測試資料庫連線資訊
 const (
 	USERNAME = "root"
-	PASSWORD = "demoroot" // shupa0127
+	PASSWORD = "shupa0215"
 	NETWORK  = "tcp"
-	SERVER   = "127.0.0.1" // mysql
+	SERVER   = "127.0.0.1"
 	PORT     = "3306"
 	DATABASE = "ticket"
 )
 
 func main() {
+
+	flag.Parse()
+
+	//server資料庫連線資訊
+	if *nFlag == 0 {
+		const (
+			USERNAME = "root"
+			PASSWORD = "shupa0127"
+			NETWORK  = "tcp"
+			SERVER   = "34.80.173.177"
+			PORT     = "3306"
+			DATABASE = "ticket"
+		)
+	}
+
 	defer DB.Close()
 
 	router := gin.Default()
