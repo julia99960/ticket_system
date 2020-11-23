@@ -7,12 +7,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var nFlag = flag.Int("n", 1, "help message for flag n")
+var nFlag = flag.Int("n", 0, "help message for flag n")
 
 //本地測試資料庫連線資訊
-const (
+var (
 	USERNAME = "root"
-	PASSWORD = "shupa0215"
+	PASSWORD = "demoroot"
 	NETWORK  = "tcp"
 	SERVER   = "127.0.0.1"
 	PORT     = "3306"
@@ -24,15 +24,10 @@ func main() {
 	flag.Parse()
 
 	//server資料庫連線資訊
-	if *nFlag == 0 {
-		const (
-			USERNAME = "root"
-			PASSWORD = "shupa0127"
-			NETWORK  = "tcp"
-			SERVER   = "34.80.173.177"
-			PORT     = "3306"
-			DATABASE = "ticket"
-		)
+	if *nFlag == 1 {
+		PASSWORD = "shupa0127"
+		SERVER = "172.17.0.2"
+		PORT = "3306"
 	}
 
 	defer DB.Close()
