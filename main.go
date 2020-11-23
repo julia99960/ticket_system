@@ -14,7 +14,7 @@ var (
 	USERNAME = "root"
 	PASSWORD = "shupa0127"
 	NETWORK  = "tcp"
-	SERVER   = "172.17.0.2"
+	SERVER   = "172.17.0.3"
 	PORT     = "3306"
 	DATABASE = "ticket"
 )
