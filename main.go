@@ -12,9 +12,9 @@ var nFlag = flag.Int("n", 0, "help message for flag n")
 //docker連線mysql
 var (
 	USERNAME = "root"
-	PASSWORD = "shupa0127"
+	PASSWORD = "demoroot"
 	NETWORK  = "tcp"
-	SERVER   = "172.17.0.3"
+	SERVER   = "127.0.0.1"
 	PORT     = "3306"
 	DATABASE = "ticket"
 )
