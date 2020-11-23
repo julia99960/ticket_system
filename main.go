@@ -9,27 +9,17 @@ import (
 
 var nFlag = flag.Int("n", 0, "help message for flag n")
 
-//本地測試資料庫連線資訊
+//docker連線mysql
 var (
 	USERNAME = "root"
-	PASSWORD = "demoroot"
+	PASSWORD = "shupa0127"
 	NETWORK  = "tcp"
-	SERVER   = "127.0.0.1"
+	SERVER   = "172.17.0.2"
 	PORT     = "3306"
 	DATABASE = "ticket"
 )
 
 func main() {
-
-	flag.Parse()
-
-	//server資料庫連線資訊
-	if *nFlag == 1 {
-		PASSWORD = "shupa0127"
-		SERVER = "172.17.0.2"
-		PORT = "3306"
-	}
-
 	defer DB.Close()
 
 	router := gin.Default()

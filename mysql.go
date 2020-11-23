@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	"log"
 )
@@ -10,6 +11,15 @@ import (
 var DB *sql.DB
 
 func init() {
+	flag.Parse()
+
+	//本地資料庫連線資訊
+	if *nFlag == 1 {
+		PASSWORD = "demoroot"
+		SERVER = "127.0.0.1"
+		PORT = "3306"
+	}
+
 	var err error
 	conn := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8mb4", USERNAME, PASSWORD, NETWORK, SERVER, PORT, DATABASE)
 	DB, err = sql.Open("mysql", conn)
