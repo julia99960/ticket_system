@@ -15,8 +15,8 @@ func init() {
 
 	//本地資料庫連線資訊
 	if *nFlag == 1 {
-		PASSWORD = "demoroot"
-		SERVER = "127.0.0.1"
+		PASSWORD = "shupa0127"
+		SERVER = "172.17.0.3"
 		PORT = "3306"
 	}
 
