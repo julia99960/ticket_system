@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -38,6 +39,12 @@ func main() {
 	router.POST("/user", AddOne)
 	router.GET("/user/:id", GetOne)
 	router.PATCH("/user/:id/status", UpdateUser)
+
+	router.GET("/test", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"msg": "hellow world",
+		})
+	})
 
 	router.Run(":8000")
 }
