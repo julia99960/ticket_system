@@ -92,13 +92,19 @@ func (d *Detail) Create() int64 {
 
 // GetRow 取得訂票資訊
 func (t *Ticket) GetRow() (tickets []Ticket, err error) {
-	rows, err := DB.Query("select * from ticket where user_id = ?", t.UserID)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for rows.Next() {
+	tch := make(chan *sql.Rows)
+	go func() {
+		rows, err := DB.Query("select * from ticket where user_id = ?", t.UserID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tch <- rows
+	}()
+
+	tData := <-tch
+	for tData.Next() {
 		var ticket Ticket
-		err := rows.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.Status)
+		err := tData.Scan(&ticket.ID, &ticket.EventNum, &ticket.UserID, &ticket.BookAt, &ticket.Status)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -107,11 +113,10 @@ func (t *Ticket) GetRow() (tickets []Ticket, err error) {
 		if err != nil {
 			rs = Detail{}
 		}
-
 		ticket.Detail = rs
 		tickets = append(tickets, ticket)
 	}
-	rows.Close()
+	tData.Close()
 	return
 }
 
