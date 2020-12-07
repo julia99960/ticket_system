@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -40,10 +41,16 @@ func main() {
 	router.GET("/user/:id", GetOne)
 	router.PATCH("/user/:id/status", UpdateUser)
 
+	//測試是否有成功啟動
 	router.GET("/test", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "hellow world",
 		})
+	})
+
+	//終止程式
+	router.GET("/stop", func(c *gin.Context) {
+		os.Exit(1)
 	})
 
 	router.Run(":8000")
