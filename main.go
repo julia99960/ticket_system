@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -20,6 +22,20 @@ var (
 	PORT     = "3306"
 	DATABASE = "ticket"
 )
+
+func init() {
+	// 建立每日紀錄log的檔案
+	fileName := fmt.Sprintf("%s_errorlog", time.Now().Format("20060102"))
+	path := fmt.Sprintf("logs/%s.txt", fileName)
+
+	if !FileExists(path) {
+		file, err := os.Create(path)
+		if err != nil {
+			fmt.Println(err)
+		}
+		defer file.Close()
+	}
+}
 
 func main() {
 	defer DB.Close()
@@ -54,4 +70,14 @@ func main() {
 	})
 
 	router.Run(":8000")
+}
+
+// FileExists 判斷檔案是否存在
+func FileExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }

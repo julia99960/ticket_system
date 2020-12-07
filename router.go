@@ -123,8 +123,7 @@ func AddOne(c *gin.Context) {
 	mail := c.Request.FormValue("mail")
 	name := c.Request.FormValue("name")
 	birthday := c.Request.FormValue("birthday")
-	sta := c.Request.FormValue("status")
-	status, _ := strconv.Atoi(sta)
+	status, _ := strconv.Atoi(c.Request.FormValue("status"))
 
 	u := User{
 		IDNumber: IDNumber,
