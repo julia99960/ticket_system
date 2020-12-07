@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -158,6 +159,11 @@ func GetOne(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"result": nil,
 		})
+
+		data := time.Now().Format("20060102 15:04:05")
+		errorLogString := fmt.Sprintf("[%s] url - %s \n\n", data, c.Request.URL)
+
+		WriteErrorLog(ErrLogPath, errorLogString)
 	}
 }
 

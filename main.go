@@ -23,18 +23,44 @@ var (
 	DATABASE = "ticket"
 )
 
+// fileName 文件檔案名稱
+var fileName string = fmt.Sprintf("%s_errorlog", time.Now().Format("20060102"))
+
+// ErrLogPath 文件檔案路徑
+var ErrLogPath string = fmt.Sprintf("logs/%s.txt", fileName)
+
 func init() {
 	// 建立每日紀錄log的檔案
-	fileName := fmt.Sprintf("%s_errorlog", time.Now().Format("20060102"))
-	path := fmt.Sprintf("logs/%s.txt", fileName)
-
-	if !FileExists(path) {
-		file, err := os.Create(path)
+	if !FileExists(ErrLogPath) {
+		file, err := os.Create(ErrLogPath)
 		if err != nil {
 			fmt.Println(err)
 		}
 		defer file.Close()
 	}
+}
+
+// WriteErrorLog 紀錄 error log
+func WriteErrorLog(fileName string, content string) error {
+	f, err := os.OpenFile(fileName, os.O_WRONLY, 777)
+	if err != nil {
+		fmt.Println("file create failed. err: " + err.Error())
+	} else {
+		n, _ := f.Seek(0, os.SEEK_END)
+		_, err = f.WriteAt([]byte(content), n)
+	}
+	defer f.Close()
+	return err
+}
+
+// FileExists 判斷檔案是否存在
+func FileExists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
 
 func main() {
@@ -70,14 +96,4 @@ func main() {
 	})
 
 	router.Run(":8000")
-}
-
-// FileExists 判斷檔案是否存在
-func FileExists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-	return true
 }
