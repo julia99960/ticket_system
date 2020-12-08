@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -143,6 +144,27 @@ func AddOne(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "unsuccess",
 		})
+
+		startTime := time.Now().Format("2006-01-02 15:04:05")
+
+		d, err := c.GetRawData()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		c.String(200, "ok")
+
+		// 請求方式
+		reqMethod := c.Request.Method
+
+		// 請求路由
+		reqURI := c.Request.RequestURI
+
+		// 請求IP
+		clientIP := c.ClientIP()
+
+		errorlog := fmt.Sprintf("[%s] %s %s%s | Data: %s \n\n", startTime, reqMethod, clientIP, reqURI, string(d))
+		WriteErrorLog(ErrLogPath, errorlog)
 	}
 }
 
@@ -160,10 +182,26 @@ func GetOne(c *gin.Context) {
 			"result": nil,
 		})
 
-		data := time.Now().Format("20060102 15:04:05")
-		errorLogString := fmt.Sprintf("[%s] url - %s \n\n", data, c.Request.URL)
+		startTime := time.Now().Format("2006-01-02 15:04:05")
 
-		WriteErrorLog(ErrLogPath, errorLogString)
+		d, err := c.GetRawData()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		c.String(200, "ok")
+
+		// 請求方式
+		reqMethod := c.Request.Method
+
+		// 請求路由
+		reqURI := c.Request.RequestURI
+
+		// 請求IP
+		clientIP := c.ClientIP()
+
+		errorlog := fmt.Sprintf("[%s] %s %s%s | Data: %s \n\n", startTime, reqMethod, clientIP, reqURI, string(d))
+		WriteErrorLog(ErrLogPath, errorlog)
 	}
 }
 
